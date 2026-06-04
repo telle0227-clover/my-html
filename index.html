@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오뚜기 컵밥 - 제품 정보 (시각장애인 접근성 버전)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+
+  :root {
+    --bg: #0A0A0A;
+    --surface: #141414;
+    --surface2: #1E1E1E;
+    --border: #2A2A2A;
+    --accent: #FFD600;
+    --accent2: #00E5A0;
+    --danger: #FF4444;
+    --text: #F5F5F5;
+    --text-sub: #AAAAAA;
+    --btn-radius: 16px;
+    --font: 'Noto Sans KR', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 18px;
+    line-height: 1.7;
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+  }
+
+  /* ── 상단 바 ── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 2px solid var(--accent);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-logo {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .topbar-logo span { color: var(--text); }
+
+  .font-controls {
+    display: flex;
+    gap: 8px;
+  }
+  .font-btn {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-family: var(--font);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .font-btn:hover, .font-btn:focus {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* ── 제품 헤더 ── */
+  .product-header {
+    background: var(--surface);
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .product-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #000;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+  .product-name {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1.25;
+    margin-bottom: 8px;
+  }
+  .product-sub {
+    font-size: 16px;
+    color: var(--text-sub);
+  }
+
+  /* ── 음성 안내 메인 버튼 ── */
+  .voice-main {
+    margin: 20px 16px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: var(--btn-radius);
+    padding: 22px 24px;
+    width: calc(100% - 32px);
+    font-family: var(--font);
+    font-size: 20px;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    transition: transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 4px 24px rgba(255,214,0,0.35);
+    position: relative;
+    overflow: hidden;
+  }
+  .voice-main:hover, .voice-main:focus {
+    transform: scale(1.02);
+    box-shadow: 0 6px 32px rgba(255,214,0,0.55);
+    outline: 4px solid #fff;
+    outline-offset: 2px;
+  }
+  .voice-main:active { transform: scale(0.98); }
+  .voice-icon {
+    font-size: 28px;
+    line-height: 1;
+  }
+  .voice-main .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.15);
+    animation: ripple 0.6s linear;
+    pointer-events: none;
+  }
+  @keyframes ripple {
+    from { width: 0; height: 0; opacity: 1; transform: translate(-50%,-50%) scale(0); }
+    to { width: 200px; height: 200px; opacity: 0; transform: translate(-50%,-50%) scale(1); }
+  }
+
+  /* ── 음성 재생 상태 ── */
+  .voice-status {
+    margin: 0 16px 16px;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    display: none;
+    align-items: center;
+    gap: 12px;
+  }
+  .voice-status.playing {
+    display: flex;
+    border-color: var(--accent2);
+  }
+  .wave {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+    height: 24px;
+  }
+  .wave span {
+    display: block;
+    width: 4px;
+    background: var(--accent2);
+    border-radius: 2px;
+    animation: wave 0.8s ease-in-out infinite;
+  }
+  .wave span:nth-child(1) { animation-delay: 0s; }
+  .wave span:nth-child(2) { animation-delay: 0.1s; }
+  .wave span:nth-child(3) { animation-delay: 0.2s; }
+  .wave span:nth-child(4) { animation-delay: 0.15s; }
+  .wave span:nth-child(5) { animation-delay: 0.05s; }
+  @keyframes wave {
+    0%, 100% { height: 6px; }
+    50% { height: 22px; }
+  }
+  .voice-status-text { font-size: 15px; color: var(--accent2); font-weight: 700; }
+
+  /* ── 섹션 ── */
+  .sections { padding: 0 16px 40px; }
+
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .section:focus-within {
+    border-color: var(--accent);
+  }
+
+  .section-btn {
+    width: 100%;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 18px;
+    font-weight: 700;
+    padding: 20px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+  }
+  .section-btn:hover, .section-btn:focus {
+    background: var(--surface2);
+    outline: none;
+  }
+  .section-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .section-title-wrap { flex: 1; }
+  .section-title { font-size: 17px; font-weight: 700; }
+  .section-desc { font-size: 13px; color: var(--text-sub); margin-top: 2px; font-weight: 400; }
+  .section-arrow {
+    font-size: 20px;
+    color: var(--text-sub);
+    transition: transform 0.25s;
+  }
+  .section-btn[aria-expanded="true"] .section-arrow {
+    transform: rotate(90deg);
+    color: var(--accent);
+  }
+
+  .section-body {
+    padding: 0 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, padding 0.25s;
+  }
+  .section-body.open {
+    max-height: 800px;
+    padding: 0 20px 20px;
+  }
+  .section-body-inner {
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+
+  /* ── 개별 음성 버튼 ── */
+  .speak-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    width: 100%;
+    font-family: var(--font);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .speak-btn:hover, .speak-btn:focus {
+    border-color: var(--accent2);
+    background: #1a2a22;
+    outline: 3px solid var(--accent2);
+    outline-offset: 2px;
+  }
+  .speak-btn .btn-icon { font-size: 20px; }
+  .speak-btn .btn-text { flex: 1; line-height: 1.3; }
+  .speak-btn .btn-label { font-size: 12px; color: var(--text-sub); font-weight: 400; margin-top: 2px; display: block; }
+  .speak-btn .play-icon { font-size: 18px; color: var(--accent2); }
+
+  /* ── 정보 테이블 ── */
+  .info-table { width: 100%; border-collapse: collapse; }
+  .info-table tr { border-bottom: 1px solid var(--border); }
+  .info-table tr:last-child { border-bottom: none; }
+  .info-table th {
+    text-align: left;
+    padding: 10px 0;
+    color: var(--text-sub);
+    font-weight: 700;
+    font-size: 14px;
+    width: 38%;
+    vertical-align: top;
+  }
+  .info-table td {
+    padding: 10px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    vertical-align: top;
+  }
+
+  /* ── 알레르기 태그 ── */
+  .allergy-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .allergy-tag {
+    background: #2a1a1a;
+    border: 2px solid var(--danger);
+    color: var(--danger);
+    font-size: 14px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 8px;
+  }
+
+  /* ── 유통기한 하이라이트 ── */
+  .expiry-highlight {
+    background: #1a1a00;
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .expiry-date {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--accent);
+  }
+  .expiry-label { font-size: 13px; color: var(--text-sub); }
+
+  /* ── 조리 스텝 ── */
+  .cook-steps { display: flex; flex-direction: column; gap: 12px; }
+  .cook-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .step-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #000;
+    font-size: 16px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-text { font-size: 16px; line-height: 1.5; padding-top: 6px; }
+
+  /* ── 영양 그리드 ── */
+  .nutrition-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .nutrition-item {
+    background: var(--surface2);
+    border-radius: 12px;
+    padding: 14px 14px;
+    border: 1px solid var(--border);
+  }
+  .nutrition-label { font-size: 13px; color: var(--text-sub); font-weight: 700; }
+  .nutrition-value { font-size: 20px; font-weight: 900; color: var(--accent); margin-top: 4px; }
+  .nutrition-unit { font-size: 13px; color: var(--text-sub); }
+
+  /* ── 하단 바 ── */
+  .bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: var(--surface);
+    border-top: 2px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+  }
+  .bottom-btn {
+    flex: 1;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 8px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .bottom-btn:hover, .bottom-btn:focus {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .bottom-btn span:first-child { font-size: 20px; }
+
+  .spacer { height: 90px; }
+
+  /* ── 저시력 글자 크기 ── */
+  body.font-lg { font-size: 22px; }
+  body.font-lg .product-name { font-size: 32px; }
+  body.font-lg .section-btn { font-size: 22px; }
+  body.font-lg .speak-btn { font-size: 20px; }
+  body.font-lg .step-text { font-size: 20px; }
+  body.font-lg .nutrition-value { font-size: 24px; }
+  body.font-xl { font-size: 26px; }
+  body.font-xl .product-name { font-size: 36px; }
+  body.font-xl .section-btn { font-size: 26px; }
+  body.font-xl .speak-btn { font-size: 23px; }
+  body.font-xl .step-text { font-size: 23px; }
+  body.font-xl .nutrition-value { font-size: 28px; }
+
+  /* 포커스 스타일 강화 */
+  :focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* 목업 라벨 */
+  .mockup-label {
+    background: #222;
+    border: 2px dashed #444;
+    color: #888;
+    text-align: center;
+    font-size: 12px;
+    padding: 8px;
+    margin: 8px 16px;
+    border-radius: 8px;
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<!-- 상단 바 -->
+<header class="topbar" role="banner">
+  <div class="topbar-logo">오뚜기<span> 컵밥</span></div>
+  <div class="font-controls" role="group" aria-label="글자 크기 조절">
+    <button class="font-btn" onclick="setFont('normal')" aria-label="기본 글자 크기">가</button>
+    <button class="font-btn" onclick="setFont('lg')" aria-label="큰 글자 크기" style="font-size:20px">가</button>
+    <button class="font-btn" onclick="setFont('xl')" aria-label="매우 큰 글자 크기" style="font-size:24px">가</button>
+  </div>
+</header>
+
+<div class="mockup-label">🖥️ UI 목업 — 시각장애인 접근성 웹페이지 시안</div>
+
+<!-- 제품 헤더 -->
+<section class="product-header" aria-label="제품 정보">
+  <div class="product-badge">오뚜기 컵밥</div>
+  <h1 class="product-name">뚝배기 불고기밥</h1>
+  <p class="product-sub">즉석국 포함 · 290g</p>
+</section>
+
+<!-- 메인 음성 안내 버튼 -->
+<!-- 모바일 브라우저 안내 배너 -->
+<div id="voiceBanner" style="display:none; margin:0 16px 12px; background:#1a1000; border:2px solid #FFD600; border-radius:12px; padding:16px; flex-direction:column; gap:10px;">
+  <div style="display:flex; align-items:center; gap:10px;">
+    <span style="font-size:26px">🔊</span>
+    <div style="flex:1;">
+      <div style="font-size:15px; font-weight:700; color:#FFD600;">음성 안내를 사용하려면</div>
+      <div style="font-size:13px; color:#ccc; margin-top:3px; line-height:1.5;">크롬(Chrome) 브라우저에서 열어주세요.<br>아래 버튼을 탭하세요.</div>
+    </div>
+    <button onclick="document.getElementById('voiceBanner').style.display='none'" style="background:none; border:none; color:#aaa; font-size:22px; cursor:pointer; padding:4px;">✕</button>
+  </div>
+  <a id="openInChrome" href="" style="display:block; background:#FFD600; color:#000; font-size:16px; font-weight:900; text-align:center; padding:14px; border-radius:10px; text-decoration:none;">
+    🌐 크롬으로 열기
+  </a>
+  <div style="font-size:12px; color:#888; text-align:center;">크롬이 없다면 구글 플레이에서 설치 후 실행하세요</div>
+</div>
+
+<button class="voice-main" id="voiceMainBtn" onclick="speakAll(this)" aria-label="전체 제품 정보 음성으로 듣기">
+  <span class="voice-icon" aria-hidden="true">🔊</span>
+  전체 정보 음성으로 듣기
+</button>
+
+<!-- 재생 상태 -->
+<div class="voice-status" id="voiceStatus" role="status" aria-live="polite">
+  <div class="wave" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+  <span class="voice-status-text">음성 안내 재생 중...</span>
+</div>
+
+<!-- 섹션들 -->
+<main class="sections" role="main">
+
+  <!-- 제품명 & 유통기한 -->
+  <div class="section">
+    <button class="section-btn" onclick="toggleSection(this)" aria-expanded="true" aria-controls="sec-basic">
+      <div class="section-icon" style="background:#1a1a00" aria-hidden="true">📦</div>
+      <div class="section-title-wrap">
+        <div class="section-title">제품명 · 유통기한</div>
+        <div class="section-desc">기본 제품 정보</div>
+      </div>
+      <span class="section-arrow" aria-hidden="true">›</span>
+    </button>
+    <div class="section-body open" id="sec-basic">
+      <div class="section-body-inner">
+        <button class="speak-btn" onclick="speak('뚝배기 불고기밥, 즉석국 포함, 290그램 제품입니다.')" aria-label="제품명 음성 안내">
+          <span class="btn-icon" aria-hidden="true">🔊</span>
+          <span class="btn-text">제품명 듣기<span class="btn-label">뚝배기 불고기밥 · 즉석국 포함 · 290g</span></span>
+          <span class="play-icon" aria-hidden="true">▶</span>
+        </button>
+        <div style="margin-top:4px">
+          <div style="font-size:14px;color:var(--text-sub);font-weight:700;margin-bottom:6px">📅 유통기한</div>
+          <div class="expiry-highlight">
+            <div>
+              <div class="expiry-date">2025년 12월 31일</div>
+              <div class="expiry-label">소비기한까지 남은 일수 확인 후 섭취하세요</div>
+            </div>
+          </div>
+          <button class="speak-btn" style="margin-top:10px" onclick="speak('유통기한은 2025년 12월 31일입니다. 소비기한을 확인 후 섭취하세요.')" aria-label="유통기한 음성 안내">
+            <span class="btn-icon" aria-hidden="true">🔊</span>
+            <span class="btn-text">유통기한 듣기<span class="btn-label">2025년 12월 31일</span></span>
+            <span class="play-icon" aria-hidden="true">▶</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 알레르기 -->
+  <div class="section">
+    <button class="section-btn" onclick="toggleSection(this)" aria-expanded="false" aria-controls="sec-allergy">
+      <div class="section-icon" style="background:#2a1a1a" aria-hidden="true">⚠️</div>
+      <div class="section-title-wrap">
+        <div class="section-title">알레르기 유발 성분</div>
+        <div class="section-desc">반드시 확인하세요</div>
+      </div>
+      <span class="section-arrow" aria-hidden="true">›</span>
+    </button>
+    <div class="section-body" id="sec-allergy">
+      <div class="section-body-inner">
+        <button class="speak-btn" onclick="speak('알레르기 유발 성분을 안내합니다. 밀, 대두, 돼지고기, 쇠고기, 계란이 포함되어 있습니다. 해당 성분에 알레르기가 있으신 분은 섭취에 주의하세요.')" aria-label="알레르기 유발 성분 전체 음성 안내">
+          <span class="btn-icon" aria-hidden="true">🔊</span>
+          <span class="btn-text">알레르기 성분 전체 듣기</span>
+          <span class="play-icon" aria-hidden="true">▶</span>
+        </button>
+        <div style="margin-top:14px">
+          <div style="font-size:14px;color:var(--danger);font-weight:700;margin-bottom:8px">⚠️ 포함된 알레르기 유발 성분</div>
+          <div class="allergy-tags" role="list">
+            <span class="allergy-tag" role="listitem">밀</span>
+            <span class="allergy-tag" role="listitem">대두(콩)</span>
+            <span class="allergy-tag" role="listitem">돼지고기</span>
+            <span class="allergy-tag" role="listitem">쇠고기</span>
+            <span class="allergy-tag" role="listitem">계란</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 영양성분 -->
+  <div class="section">
+    <button class="section-btn" onclick="toggleSection(this)" aria-expanded="false" aria-controls="sec-nutrition">
+      <div class="section-icon" style="background:#0a1a1a" aria-hidden="true">🥗</div>
+      <div class="section-title-wrap">
+        <div class="section-title">영양성분</div>
+        <div class="section-desc">1회 제공량 기준</div>
+      </div>
+      <span class="section-arrow" aria-hidden="true">›</span>
+    </button>
+    <div class="section-body" id="sec-nutrition">
+      <div class="section-body-inner">
+        <button class="speak-btn" onclick="speak('영양성분을 안내합니다. 1회 제공량 290그램 기준입니다. 열량 390킬로칼로리, 탄수화물 62그램, 단백질 14그램, 지방 9그램, 나트륨 740밀리그램입니다.')" aria-label="영양성분 전체 음성 안내">
+          <span class="btn-icon" aria-hidden="true">🔊</span>
+          <span class="btn-text">영양성분 전체 듣기</span>
+          <span class="play-icon" aria-hidden="true">▶</span>
+        </button>
+        <div class="nutrition-grid" style="margin-top:14px" role="list">
+          <div class="nutrition-item" role="listitem">
+            <div class="nutrition-label">열량</div>
+            <div class="nutrition-value">390<span class="nutrition-unit">kcal</span></div>
+          </div>
+          <div class="nutrition-item" role="listitem">
+            <div class="nutrition-label">탄수화물</div>
+            <div class="nutrition-value">62<span class="nutrition-unit">g</span></div>
+          </div>
+          <div class="nutrition-item" role="listitem">
+            <div class="nutrition-label">단백질</div>
+            <div class="nutrition-value">14<span class="nutrition-unit">g</span></div>
+          </div>
+          <div class="nutrition-item" role="listitem">
+            <div class="nutrition-label">지방</div>
+            <div class="nutrition-value">9<span class="nutrition-unit">g</span></div>
+          </div>
+          <div class="nutrition-item" role="listitem">
+            <div class="nutrition-label">나트륨</div>
+            <div class="nutrition-value">740<span class="nutrition-unit">mg</span></div>
+          </div>
+          <div class="nutrition-item" role="listitem">
+            <div class="nutrition-label">당류</div>
+            <div class="nutrition-value">5<span class="nutrition-unit">g</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 조리 방법 -->
+  <div class="section">
+    <button class="section-btn" onclick="toggleSection(this)" aria-expanded="false" aria-controls="sec-cook">
+      <div class="section-icon" style="background:#0a1500" aria-hidden="true">🍳</div>
+      <div class="section-title-wrap">
+        <div class="section-title">조리 방법</div>
+        <div class="section-desc">전자레인지 기준</div>
+      </div>
+      <span class="section-arrow" aria-hidden="true">›</span>
+    </button>
+    <div class="section-body" id="sec-cook">
+      <div class="section-body-inner">
+        <button class="speak-btn" onclick="speak('조리 방법을 안내합니다. 첫 번째, 뚜껑을 절취선까지 열어주세요. 두 번째, 전자레인지에 넣고 2분 30초 가열하세요. 세 번째, 꺼낸 후 뚜껑을 완전히 열고 잘 저어주세요. 네 번째, 뜨거우니 주의하며 드세요. 국은 별도로 1분 가열합니다.')" aria-label="조리 방법 전체 음성 안내">
+          <span class="btn-icon" aria-hidden="true">🔊</span>
+          <span class="btn-text">조리 방법 전체 듣기</span>
+          <span class="play-icon" aria-hidden="true">▶</span>
+        </button>
+        <div class="cook-steps" style="margin-top:14px" role="list">
+          <div class="cook-step" role="listitem">
+            <div class="step-num" aria-hidden="true">1</div>
+            <div class="step-text">뚜껑을 <strong>절취선까지</strong> 열어주세요</div>
+          </div>
+          <div class="cook-step" role="listitem">
+            <div class="step-num" aria-hidden="true">2</div>
+            <div class="step-text">전자레인지에 넣고 <strong>2분 30초</strong> 가열하세요</div>
+          </div>
+          <div class="cook-step" role="listitem">
+            <div class="step-num" aria-hidden="true">3</div>
+            <div class="step-text">꺼낸 후 뚜껑을 완전히 열고 잘 저어주세요</div>
+          </div>
+          <div class="cook-step" role="listitem">
+            <div class="step-num" aria-hidden="true">4</div>
+            <div class="step-text">🔥 <strong>뜨거우니 주의</strong>하며 드세요</div>
+          </div>
+          <div class="cook-step" role="listitem">
+            <div class="step-num" aria-hidden="true">+</div>
+            <div class="step-text">즉석국은 별도로 <strong>1분</strong> 가열하세요</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 보관 방법 -->
+  <div class="section">
+    <button class="section-btn" onclick="toggleSection(this)" aria-expanded="false" aria-controls="sec-store">
+      <div class="section-icon" style="background:#0a0a1a" aria-hidden="true">🏠</div>
+      <div class="section-title-wrap">
+        <div class="section-title">보관 방법</div>
+        <div class="section-desc">올바른 보관 안내</div>
+      </div>
+      <span class="section-arrow" aria-hidden="true">›</span>
+    </button>
+    <div class="section-body" id="sec-store">
+      <div class="section-body-inner">
+        <button class="speak-btn" onclick="speak('보관 방법을 안내합니다. 직사광선을 피해 서늘하고 건조한 곳에 보관하세요. 개봉 후에는 즉시 드세요. 냉동 보관하지 마세요.')" aria-label="보관 방법 음성 안내">
+          <span class="btn-icon" aria-hidden="true">🔊</span>
+          <span class="btn-text">보관 방법 듣기</span>
+          <span class="play-icon" aria-hidden="true">▶</span>
+        </button>
+        <table class="info-table" style="margin-top:12px" aria-label="보관 방법 상세">
+          <tr>
+            <th scope="row">보관 온도</th>
+            <td>실온 보관</td>
+          </tr>
+          <tr>
+            <th scope="row">주의사항</th>
+            <td>직사광선 피할 것</td>
+          </tr>
+          <tr>
+            <th scope="row">개봉 후</th>
+            <td>즉시 섭취</td>
+          </tr>
+          <tr>
+            <th scope="row">냉동</th>
+            <td>보관 불가</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="spacer"></div>
+
+<!-- 하단 고정 바 -->
+<nav class="bottom-bar" role="navigation" aria-label="주요 기능">
+  <button class="bottom-btn" onclick="speakAll(this)" aria-label="전체 음성 안내">
+    <span aria-hidden="true">🔊</span>
+    <span>전체 듣기</span>
+  </button>
+  <button class="bottom-btn" onclick="stopSpeak()" aria-label="음성 정지">
+    <span aria-hidden="true">⏹</span>
+    <span>정지</span>
+  </button>
+  <button class="bottom-btn" onclick="window.location.reload()" aria-label="처음으로">
+    <span aria-hidden="true">🏠</span>
+    <span>처음으로</span>
+  </button>
+  <button class="bottom-btn" onclick="alert('고객센터: 080-433-8888')" aria-label="고객센터 전화">
+    <span aria-hidden="true">📞</span>
+    <span>고객센터</span>
+  </button>
+</nav>
+
+<script>
+  // ── 글자 크기 조절
+  function setFont(size) {
+    document.body.classList.remove('font-lg', 'font-xl');
+    if (size === 'lg') document.body.classList.add('font-lg');
+    if (size === 'xl') document.body.classList.add('font-xl');
+    speak(size === 'normal' ? '기본 글자 크기로 변경되었습니다.' : size === 'lg' ? '글자가 크게 변경되었습니다.' : '글자가 매우 크게 변경되었습니다.');
+  }
+
+  // ── 섹션 토글
+  function toggleSection(btn) {
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    const bodyId = btn.getAttribute('aria-controls');
+    const body = document.getElementById(bodyId);
+    btn.setAttribute('aria-expanded', String(!expanded));
+    body.classList.toggle('open', !expanded);
+  }
+
+  // ── 음성 합성
+  let currentUtterance = null;
+
+  function speak(text) {
+    if (!window.speechSynthesis) {
+      alert('이 브라우저에서는 음성 안내를 지원하지 않습니다.');
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'ko-KR';
+    utter.rate = 0.9;
+    utter.pitch = 1.0;
+    utter.volume = 1.0;
+
+    const status = document.getElementById('voiceStatus');
+    status.classList.add('playing');
+
+    utter.onend = () => { status.classList.remove('playing'); };
+    utter.onerror = () => { status.classList.remove('playing'); };
+
+    currentUtterance = utter;
+    window.speechSynthesis.speak(utter);
+  }
+
+  function stopSpeak() {
+    window.speechSynthesis.cancel();
+    document.getElementById('voiceStatus').classList.remove('playing');
+    speak('음성 안내가 정지되었습니다.');
+  }
+
+  function speakAll(btn) {
+    // 리플 효과
+    const r = document.createElement('span');
+    r.className = 'ripple';
+    r.style.left = '50%'; r.style.top = '50%';
+    btn.appendChild(r);
+    setTimeout(() => r.remove(), 700);
+
+    const allText = `
+      오뚜기 컵밥 뚝배기 불고기밥 제품 정보를 안내합니다.
+      제품명: 뚝배기 불고기밥, 즉석국 포함, 290그램.
+      유통기한: 2025년 12월 31일.
+      알레르기 유발 성분: 밀, 대두, 돼지고기, 쇠고기, 계란이 포함되어 있습니다.
+      열량은 390킬로칼로리이며, 탄수화물 62그램, 단백질 14그램, 지방 9그램, 나트륨 740밀리그램입니다.
+      조리 방법: 뚜껑을 절취선까지 열고, 전자레인지에 2분 30초 가열 후, 잘 저어 드세요.
+      보관 방법: 직사광선을 피해 서늘한 곳에 실온 보관하세요.
+      이상입니다.
+    `;
+    speak(allText);
+  }
+
+  // ── 모바일 음성 잠금 해제 (iOS/Android 완전 대응)
+  let voiceUnlocked = false;
+
+  function unlockVoice(callback) {
+    if (voiceUnlocked) { callback && callback(); return; }
+    // 빈 utterance로 음성 엔진 깨우기
+    const u = new SpeechSynthesisUtterance(' ');
+    u.volume = 0;
+    u.onend = () => {
+      voiceUnlocked = true;
+      callback && callback();
+    };
+    u.onerror = () => {
+      voiceUnlocked = true;
+      callback && callback();
+    };
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  // speak 함수를 unlock 후 실행하도록 래핑
+  const _speak = speak;
+  speak = function(text) {
+    if (!window.speechSynthesis) {
+      alert('이 브라우저는 음성을 지원하지 않습니다.\n크롬 또는 사파리 브라우저를 사용해주세요.');
+      return;
+    }
+    if (voiceUnlocked) {
+      _speak(text);
+    } else {
+      unlockVoice(() => { setTimeout(() => _speak(text), 100); });
+    }
+  };
+
+  // 페이지 로드 시 브라우저 확인 후 안내
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const ua = navigator.userAgent;
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(ua);
+      const isChrome = /Chrome/.test(ua) && !/Edg|OPR|SamsungBrowser/.test(ua);
+      const isSafari = /Safari/.test(ua) && !/Chrome/.test(ua);
+
+      if (isMobile && !isChrome && !isSafari) {
+        // 크롬/사파리가 아닌 모바일 브라우저 → 안내 배너 표시
+        const banner = document.getElementById('voiceBanner');
+        const chromeLink = document.getElementById('openInChrome');
+        if (chromeLink) {
+          // 현재 페이지 URL을 크롬으로 열기 intent 링크
+          const url = window.location.href;
+          const isAndroid = /Android/i.test(ua);
+          if (isAndroid) {
+            chromeLink.href = 'intent://' + url.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end';
+          } else {
+            chromeLink.href = 'googlechrome://' + url.replace(/^https?:\/\//, '');
+          }
+        }
+        if (banner) banner.style.display = 'flex';
+      } else if (isMobile && (isChrome || isSafari)) {
+        // 크롬/사파리면 음성 안내 배너만 표시
+        const banner = document.getElementById('voiceBanner');
+        if (banner) {
+          banner.innerHTML = '<div style="display:flex;align-items:center;gap:10px;"><span style="font-size:24px">👆</span><div><div style="font-size:15px;font-weight:700;color:#00E5A0;">음성 안내 준비됨</div><div style="font-size:13px;color:#aaa;margin-top:3px;">아래 노란색 버튼을 탭하면 음성이 시작됩니다</div></div><button onclick="document.getElementById(\'voiceBanner\').style.display=\'none\'" style="margin-left:auto;background:none;border:none;color:#aaa;font-size:20px;cursor:pointer;">✕</button></div>';
+          banner.style.background = '#1a2a00';
+          banner.style.borderColor = '#00E5A0';
+          banner.style.display = 'flex';
+        }
+      }
+    }, 600);
+  });
+</script>
+</body>
+</html>
