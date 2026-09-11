@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perler Bead Pattern Studio (마이블록스튜디오 스타일)</title>
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --primary: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --accent: #f59e0b;
+      --text-main: #1f2937;
+      --text-sub: #6b7280;
+      --border: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 20px 16px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* 헤더 영역 */
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    header p {
+      font-size: 0.95rem;
+      color: var(--text-sub);
+    }
+
+    /* 카테고리 내비게이션 */
+    .category-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+      background-color: #fff;
+      color: var(--text-main);
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .tab-btn:hover {
+      background-color: #f3f4f6;
+    }
+
+    .tab-btn.active {
+      background-color: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+    }
+
+    /* 도안 선택 카탈로그 */
+    .catalog-section {
+      margin-bottom: 28px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 12px;
+    }
+
+    .char-card {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+    }
+
+    .char-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .char-card.active {
+      border-color: var(--primary);
+      background-color: var(--primary-light);
+    }
+
+    .card-preview {
+      width: 72px;
+      height: 72px;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-template-rows: repeat(12, 1fr);
+      gap: 0.5px;
+      background: #f3f4f6;
+      border-radius: 6px;
+      padding: 2px;
+      margin-bottom: 8px;
+      pointer-events: none;
+    }
+
+    .card-preview-cell {
+      border-radius: 50%;
+    }
+
+    .char-card span {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* 워크스페이스 레이아웃 */
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    }
+
+    .editor-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .desc-banner {
+      width: 100%;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--primary-dark);
+      background: var(--primary-light);
+      padding: 10px 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    /* 그리드 및 좌표 레이아웃 */
+    .grid-wrapper {
+      position: relative;
+      display: inline-block;
+      padding: 20px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .bead-grid-container {
+      position: relative;
+    }
+
+    /* 12x12 메인 비즈 도판 */
+    .bead-grid {
+      width: 320px;
+      height: 320px;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-template-rows: repeat(12, 1fr);
+      gap: 2px;
+      background: #e5e7eb;
+      padding: 6px;
+      border-radius: 8px;
+    }
+
+    .bead-cell {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background-color: #ffffff;
+      box-shadow: inset -1px -1px 2px rgba(0,0,0,0.2), inset 1px 1px 2px rgba(255,255,255,0.8);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .bead-cell.dimmed {
+      opacity: 0.15;
+      filter: grayscale(80%);
+      transform: scale(0.85);
+    }
+
+    .bead-cell.highlighted {
+      opacity: 1;
+      transform: scale(1.15);
+      box-shadow: 0 0 8px rgba(0,0,0,0.3);
+      z-index: 2;
+    }
+
+    /* 좌표 번호 표시 */
+    .ruler-x {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      width: 320px;
+      margin-bottom: 4px;
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: bold;
+      color: #9ca3af;
+    }
+
+    .ruler-y {
+      display: grid;
+      grid-template-rows: repeat(12, 1fr);
+      height: 320px;
+      position: absolute;
+      left: 0px;
+      top: 24px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      color: #9ca3af;
+      align-items: center;
+    }
+
+    /* 컨트롤 도구 모음 */
+    .tools-bar {
+      margin-top: 16px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .tool-btn {
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tool-btn:hover {
+      background: #f9fafb;
+    }
+
+    /* 우측 팔레트 및 카운트 */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .bead-count-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .bead-count-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: #f9fafb;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .bead-count-item:hover {
+      border-color: var(--primary);
+    }
+
+    .bead-count-item.selected {
+      border-color: var(--primary);
+      background-color: var(--primary-light);
+      font-weight: bold;
+    }
+
+    .color-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .color-chip {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.15);
+    }
+
+    .color-name {
+      font-size: 0.85rem;
+    }
+
+    .count-badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      background: #fff;
+      padding: 2px 8px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .total-card {
+      background: #f3f4f6;
+      padding: 12px 16px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    /* 직접 그리기용 팔레트 모드 */
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .palette-item {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      box-shadow: inset -1px -1px 2px rgba(0,0,0,0.2);
+    }
+
+    .palette-item.active {
+      border-color: #000;
+      transform: scale(1.1);
+    }
+
+    /* 확대 모달 (MyBlockStudio 스타일) */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 24px;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 90vw;
+      position: relative;
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .modal-grid-box {
+      position: relative;
+      padding: 20px;
+      background: #f9fafb;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .modal-bead-grid {
+      width: 480px;
+      height: 480px;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-template-rows: repeat(12, 1fr);
+      gap: 4px;
+      background: #d1d5db;
+      padding: 8px;
+      border-radius: 8px;
+    }
+
+    .close-modal-btn {
+      position: absolute;
+      top: 12px; right: 16px;
+      font-size: 1.5rem;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: #9ca3af;
+    }
+
+    @media (max-width: 850px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+      .bead-grid {
+        width: 280px;
+        height: 280px;
+      }
+      .ruler-x { width: 280px; }
+      .ruler-y { height: 280px; }
+      .modal-bead-grid {
+        width: 300px;
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🎨 Perler Bead Studio</h1>
+    <p>원하는 도안을 선택하거나 색상을 골라 나만의 픽셀 비즈 도안을 완성해 보세요!</p>
+  </header>
+
+  <!-- 카테고리 탭 -->
+  <div class="category-tabs" id="categoryTabs">
+    <button class="tab-btn active" onclick="switchCategory('peterpan')">🧚‍♂️ 피터팬</button>
+    <button class="tab-btn" onclick="switchCategory('animal')">🐶 동물</button>
+    <button class="tab-btn" onclick="switchCategory('plant')">🌱 식물/자연</button>
+    <button class="tab-btn" onclick="switchCategory('game_attack')">⚔️ 무기/공격</button>
+    <button class="tab-btn" onclick="switchCategory('game_defend')">🛡️ 방어/방구</button>
+    <button class="tab-btn" onclick="switchCategory('game_heal')">🧪 회복/포션</button>
+    <button class="tab-btn" onclick="switchCategory('game_monster')">👾 몬스터</button>
+  </div>
+
+  <!-- 캐릭터 프리뷰 목록 -->
+  <section class="catalog-section">
+    <div class="card-grid" id="cardGrid"></div>
+  </section>
+
+  <!-- 메인 작업 공간 -->
+  <main class="workspace">
+    <div class="editor-section">
+      <div class="desc-banner" id="charDescBanner">"네버랜드를 향해 날아가는 용감한 피터팬!"</div>
+
+      <div class="grid-wrapper">
+        <div class="ruler-x" id="rulerX"></div>
+        <div class="ruler-y" id="rulerY"></div>
+        <div class="bead-grid-container">
+          <div class="bead-grid" id="beadGrid"></div>
+        </div>
+      </div>
+
+      <div class="tools-bar">
+        <button class="tool-btn" onclick="openZoomModal()">🔍 크게보기</button>
+        <button class="tool-btn" onclick="clearBoard()">🗑️ 도판 비우기</button>
+        <button class="tool-btn" onclick="window.print()">🖨️ 도안 인쇄</button>
+      </div>
+    </div>
+
+    <!-- 우측 색상 팔레트 및 카운터 -->
+    <div class="sidebar">
+      <div>
+        <div class="panel-title">
+          <span>🎨 직접 그리기 팔레트</span>
+          <span style="font-size: 0.75rem; color: var(--text-sub);">색상 선택 후 클릭</span>
+        </div>
+        <div class="palette-grid" id="paletteGrid"></div>
+      </div>
+
+      <div>
+        <div class="panel-title">
+          <span>📊 사용된 비즈 개수</span>
+          <button style="font-size: 0.75rem; color: var(--primary); background:none; border:none; cursor:pointer;" onclick="resetHighlight()">강조 해제</button>
+        </div>
+        <ul class="bead-count-list" id="beadCountList"></ul>
+      </div>
+
+      <div class="total-card">
+        <span>총 필요 비즈:</span>
+        <span id="totalBeadsCount" style="color: var(--primary);">0개</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- 확대 모달 -->
+  <div class="modal-overlay" id="zoomModal" onclick="closeZoomModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="close-modal-btn" onclick="closeZoomModal()">✕</button>
+      <div class="modal-title" id="modalTitle">확대 도안 (격자 보기)</div>
+      <div class="modal-grid-box">
+        <div class="modal-bead-grid" id="modalBeadGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const COLOR_MAP = {
+      ".": { name: "바탕(투명)", hex: "#ffffff" },
+      "G": { name: "초록색", hex: "#2e7d32" },
+      "L": { name: "연초록색", hex: "#81c784" },
+      "S": { name: "살구색", hex: "#ffcc80" },
+      "R": { name: "빨간색", hex: "#e53935" },
+      "Y": { name: "노란색", hex: "#fdd835" },
+      "B": { name: "갈색", hex: "#6d4c41" },
+      "K": { name: "검은색", hex: "#212121" },
+      "W": { name: "흰색", hex: "#f5f5f5" },
+      "U": { name: "파란색", hex: "#1e88e5" },
+      "P": { name: "분홍색", hex: "#f48fb1" },
+      "C": { name: "연두색", hex: "#aed581" },
+      "A": { name: "하늘색", hex: "#80deea" },
+      "O": { name: "주황색", hex: "#fb8c00" },
+      "V": { name: "보라색", hex: "#8e24aa" }
+    };
+
+    const DATA = {
+      peterpan: [
+        { id: "peterpan", name: "피터팬", desc: "✨ 네버랜드를 향해 날아가는 용감한 피터팬!", grid: ["............","....RR......","...RGGGG....","..GGGGGGG...","..GGGGGGG...","..SSSSSSS...","..SKSSSK....","..SSSSSSS...","...SBBBS....","...GGGGG....","..GGGGGGG...","..GG.GG....."] },
+        { id: "tinkerbell", name: "팅커벨", desc: "🧚‍♀️ 요정 가루를 반짝이며 나누어주는 팅커벨!", grid: ["....YYYY....","...YYYYYY...","..A.YYYY.A..",".AA.SSSS.AA.","AAA.SKSK.AAA",".AA.SSSS.AA.","..A.SBBB.A..","....CCCC....","...CCCCCC...","...CCCCCC...","....SSSS....","....S..S...."] },
+        { id: "hook", name: "후크선장", desc: "🏴‍☠️ 빨간 모자가 매력적인 해적들의 대장 후크선장!", grid: ["...KKKKKK...","..KRRRRRRK..","..KWWWWWWK..","...SSSSSS...","..SKSSKS....","..SSSSSS....","..KKKKKK....","...RRRR.....","..RRRRRR....","..RRRRRR....","..RR..RR....","..KK..KK...."] }
+      ],
+      animal: [
+        { id: "dog", name: "강아지", desc: "🐶 멍멍! 항상 나를 반겨주는 귀여운 멍뭉이!", grid: ["...B....B...","..BBB..BBB..","..BBBBBBBB..",".BBBBBBBBBB.",".BBSKSSKSBB.",".BBSSSSSSBB.",".BBSSSSSSBB.","..BSSSSSSB..","...SBBBBS...","....SSSS....","....S..S....","............"] },
+        { id: "cat", name: "고양이", desc: "🐱 야옹! 도도하지만 사랑스러운 냥이 친구!", grid: ["..K......K..","..KK....KK..","..KKKKKKKK..",".KKKKKKKKKK.",".KKWKKKWKKK.",".KKKKPPKKKK.",".KKKWKWKKKK.","..KKWWWWKK..","...KKKKKK...","..KKKKKKKK..","..KK....KK..","............"] }
+      ],
+      plant: [
+        { id: "apple", name: "사과", desc: "🍎 새콤달콤 보기만 해도 상큼한 붉은 사과!", grid: ["......B.....",".....LL.....","....LL......","...RRRRRR...","..RRRRRRRR..",".RRRRRRRRRR.",".RRRRRRRRRR.",".RRRRRRRRRR.",".RRRRRRRRRR.","..RRRRRRRR..","...RRRRRR...","............"] },
+        { id: "sunflower", name: "해바라기", desc: "🌻 태양을 바라보며 환하게 웃는 노란 해바라기!", grid: ["....YYYY....","...YYYYYY...","..YYBBBBYY..",".YYBBBBBBYY.",".YYBBBBBBYY.",".YYBBBBBBYY.",".YYBBBBBBYY.","..YYBBBBYY..","...YYYYYY...","....YGGY....",".....GG.....",".....GG....."] }
+      ],
+      game_attack: [
+        { id: "sword", name: "전설의 검", desc: "⚔️ 몬스터를 물리치는 빛나는 용사의 단검!", grid: [".......W....","......WW....",".....WW.....","....WW......","...WW.......","..WW........","..BW........",".B.B........","B...B.......",".....B......","......B.....","............"] },
+        { id: "fireball", name: "파이어 볼", desc: "🔥 뜨거운 마법 에너지가 뿜어져 나오는 화염구!", grid: ["....RR......","...RRO......","..RROOO.....","..ROOOOO....",".ROOYYYY....",".OOYYYYW....",".OOYYYYW....",".ROOYYYY....","..ROOOOO....","..RROOO.....","...RRO......","....RR......"] }
+      ],
+      game_defend: [
+        { id: "shield", name: "기사의 방패", desc: "🛡️ 어떤 공격도 든든하게 막아내는 단단한 방패!", grid: ["............",".UUUUUUUUUU.",".UYYYYYYYYU.",".UYWWWWWWYU.",".UYWWWWWWYU.",".UYWWWWWWYU.",".UYYYYYYYYU.","..UYYYYYYU..","...UYYYYU...","....UYYU....",".....UU.....","............"] },
+        { id: "barrier", name: "수호 테두리", desc: "✨ 용사의 몸을 안전하게 지켜주는 마법 방어막!", grid: ["...AAAAAA...","..A......A..",".A........A.",".A...WW...A.",".A..WWWW..A.",".A..WWWW..A.",".A...WW...A.",".A........A.",".A........A..","..A......A..","...AAAAAA...","............"] }
+      ],
+      game_heal: [
+        { id: "potion", name: "체력 포션", desc: "🧪 지친 몸을 싹~ 회복시켜 주는 빨간 힐링 포션!", grid: [".....KK.....",".....KK.....","....WWWW....","...RWRRRR...","..RRWRRRRR..",".RRRWRRRRRR.",".RRRRRRRRRR.",".RRRRRRRRRR.",".RRRRRRRRRR.","..RRRRRRRR..","...RRRRRR...","............"] },
+        { id: "heart", name: "마법 하트", desc: "💖 따뜻한 사랑과 에너지를 채워주는 포근한 하트!", grid: ["............",".RRRR..RRRR.",".RRRRRRRRRR.",".RRRRRRRRRR.",".RRRRRRRRRR.",".RRRRRRRRRR.","..RRRRRRRR..","...RRRRRR...","....RRRR....",".....RR.....","............","............"] }
+      ],
+      game_monster: [
+        { id: "slime", name: "말랑 슬라임", desc: "👾 통통 튀어다니는 초보 용사의 귀여운 숙적!", grid: ["............","....CCCC....","..CCCCCCCC..",".CCCCCCCCCC.",".CCWCCCWCCC.",".CCKCCCKCCC.",".CCCCCCCCCC.",".CCCCCCCCCC.",".CCCCCCCCCC.","..CCCCCCCC..","............","............"] },
+        { id: "dragon", name: "아기 드래곤", desc: "🐉 불꽃을 연습 중인 전설의 아기 드래곤!", grid: [".....GG.....","....GGGG....","...GGWWGG...","..GGGKGGKG..","..GGGGGGGG..","..GGGGGGGG..","...GGGGGG...","..GGGGGGGG..",".GGGGGGGGGG.",".G.GGGGGG.G.",".G.GG..GG.G.","............"] }
+      ]
+    };
+
+    let currentCategory = "peterpan";
+    let selectedCharId = "peterpan";
+    let activeHighlightColor = null;
+    let selectedBrushColor = "R"; // 기본 그리기 색상
+    let currentGridState = []; // 현재 에디터 상태 저장
+
+    // 좌표계 생성
+    function renderRulers() {
+      const rx = document.getElementById("rulerX");
+      const ry = document.getElementById("rulerY");
+      rx.innerHTML = ""; ry.innerHTML = "";
+      for (let i = 1; i <= 12; i++) {
+        rx.innerHTML += `<div>${i}</div>`;
+        ry.innerHTML += `<div>${i}</div>`;
+      }
+    }
+
+    // 팔레트 생성
+    function renderPalette() {
+      const pGrid = document.getElementById("paletteGrid");
+      pGrid.innerHTML = "";
+      for (let code in COLOR_MAP) {
+        if (code === ".") continue;
+        const item = document.createElement("div");
+        item.className = `palette-item ${code === selectedBrushColor ? 'active' : ''}`;
+        item.style.backgroundColor = COLOR_MAP[code].hex;
+        item.title = COLOR_MAP[code].name;
+        item.onclick = () => {
+          selectedBrushColor = code;
+          document.querySelectorAll(".palette-item").forEach(el => el.classList.remove("active"));
+          item.classList.add("active");
+        };
+        pGrid.appendChild(item);
+      }
+    }
+
+    function switchCategory(cat) {
+      currentCategory = cat;
+      activeHighlightColor = null;
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.getAttribute("onclick").includes(cat));
+      });
+      selectedCharId = DATA[cat][0].id;
+      initCatalog();
+      loadCharacterData();
+    }
+
+    function renderMiniPreview(gridData, container) {
+      container.innerHTML = "";
+      gridData.forEach(row => {
+        for (let char of row) {
+          const cell = document.createElement("div");
+          cell.className = "card-preview-cell";
+          cell.style.backgroundColor = COLOR_MAP[char] ? COLOR_MAP[char].hex : "#fff";
+          container.appendChild(cell);
+        }
+      });
+    }
+
+    function initCatalog() {
+      const cardGrid = document.getElementById("cardGrid");
+      cardGrid.innerHTML = "";
+      DATA[currentCategory].forEach(char => {
+        const card = document.createElement("div");
+        card.className = `char-card ${char.id === selectedCharId ? 'active' : ''}`;
+        card.onclick = () => {
+          selectedCharId = char.id;
+          document.querySelectorAll(".char-card").forEach(c => c.classList.remove("active"));
+          card.classList.add("active");
+          loadCharacterData();
+        };
+
+        const previewBox = document.createElement("div");
+        previewBox.className = "card-preview";
+        renderMiniPreview(char.grid, previewBox);
+
+        const label = document.createElement("span");
+        label.innerText = char.name;
+
+        card.appendChild(previewBox);
+        card.appendChild(label);
+        cardGrid.appendChild(card);
+      });
+    }
+
+    function loadCharacterData() {
+      const char = DATA[currentCategory].find(c => c.id === selectedCharId);
+      if (!char) return;
+      document.getElementById("charDescBanner").innerText = char.desc;
+      currentGridState = char.grid.map(row => row.split(""));
+      renderBoard();
+    }
+
+    // 도판 렌더링
+    function renderBoard() {
+      const beadGrid = document.getElementById("beadGrid");
+      beadGrid.innerHTML = "";
+
+      const colorCounts = {};
+      let totalCount = 0;
+
+      currentGridState.forEach((row, rIdx) => {
+        row.forEach((charCode, cIdx) => {
+          const cell = document.createElement("div");
+          cell.className = "bead-cell";
+          cell.setAttribute("data-color", charCode);
+          cell.style.backgroundColor = COLOR_MAP[charCode] ? COLOR_MAP[charCode].hex : "#fff";
+
+          // 직접 그리기 기능
+          cell.onclick = () => {
+            currentGridState[rIdx][cIdx] = (currentGridState[rIdx][cIdx] === selectedBrushColor) ? "." : selectedBrushColor;
+            renderBoard();
+          };
+
+          beadGrid.appendChild(cell);
+
+          if (charCode !== ".") {
+            colorCounts[charCode] = (colorCounts[charCode] || 0) + 1;
+            totalCount++;
+          }
+        });
+      });
+
+      // 우측 수량 리스트
+      const beadCountList = document.getElementById("beadCountList");
+      beadCountList.innerHTML = "";
+
+      for (let code in colorCounts) {
+        const count = colorCounts[code];
+        const colorObj = COLOR_MAP[code];
+
+        const li = document.createElement("li");
+        li.className = "bead-count-item";
+        li.setAttribute("data-color-code", code);
+        li.onclick = () => toggleColorHighlight(code);
+
+        li.innerHTML = `
+          <div class="color-info">
+            <div class="color-chip" style="background-color: ${colorObj.hex};"></div>
+            <span class="color-name">${colorObj.name}</span>
+          </div>
+          <span class="count-badge">${count}개</span>
+        `;
+        beadCountList.appendChild(li);
+      }
+
+      document.getElementById("totalBeadsCount").innerText = `${totalCount}개`;
+      applyHighlight();
+    }
+
+    function toggleColorHighlight(code) {
+      activeHighlightColor = (activeHighlightColor === code) ? null : code;
+      applyHighlight();
+    }
+
+    function resetHighlight() {
+      activeHighlightColor = null;
+      applyHighlight();
+    }
+
+    function applyHighlight() {
+      const cells = document.querySelectorAll("#beadGrid .bead-cell");
+      const listItems = document.querySelectorAll(".bead-count-item");
+
+      cells.forEach(cell => {
+        const colorCode = cell.getAttribute("data-color");
+        if (!activeHighlightColor) {
+          cell.classList.remove("dimmed", "highlighted");
+        } else if (colorCode === activeHighlightColor) {
+          cell.classList.remove("dimmed");
+          cell.classList.add("highlighted");
+        } else {
+          cell.classList.remove("highlighted");
+          cell.classList.add("dimmed");
+        }
+      });
+
+      listItems.forEach(item => {
+        const code = item.getAttribute("data-color-code");
+        item.classList.toggle("selected", activeHighlightColor && code === activeHighlightColor);
+      });
+    }
+
+    function clearBoard() {
+      currentGridState = Array(12).fill(null).map(() => Array(12).fill("."));
+      renderBoard();
+    }
+
+    /* 크게보기 모달 */
+    function openZoomModal() {
+      const modalGrid = document.getElementById("modalBeadGrid");
+      modalGrid.innerHTML = "";
+
+      currentGridState.forEach(row => {
+        row.forEach(charCode => {
+          const cell = document.createElement("div");
+          cell.className = "bead-cell";
+          cell.style.backgroundColor = COLOR_MAP[charCode] ? COLOR_MAP[charCode].hex : "#fff";
+          modalGrid.appendChild(cell);
+        });
+      });
+
+      document.getElementById("zoomModal").classList.add("active");
+    }
+
+    function closeZoomModal(e) {
+      if (!e || e.target.classList.contains("modal-overlay") || e.target.classList.contains("close-modal-btn")) {
+        document.getElementById("zoomModal").classList.remove("active");
+      }
+    }
+
+    window.onload = () => {
+      renderRulers();
+      renderPalette();
+      initCatalog();
+      loadCharacterData();
+    };
+  </script>
+</body>
+</html>
